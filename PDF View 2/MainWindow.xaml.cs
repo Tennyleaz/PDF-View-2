@@ -246,6 +246,7 @@ namespace PDF_View_2
                 return;
             if (_started)
             {
+                ShowImageResizeHandle(false);
                 Point point = e.GetPosition(grid2);
                 Rect rect = new Rect(_downPoint, point);
                 pickRectangle.Margin = new Thickness(rect.Left, rect.Top, 0, 0);
@@ -286,6 +287,7 @@ namespace PDF_View_2
             Panel.SetZIndex(img, 0);
             btnDelete.IsEnabled = true;
             btnClear.IsEnabled = true;
+            this.Cursor = Cursors.Arrow;
         }
 
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -305,9 +307,20 @@ namespace PDF_View_2
             if (sender is Image img && e.LeftButton == MouseButtonState.Pressed && img == movingObject)
             {
                 EndPosition = e.GetPosition(grid2);
+                //labelDebug.Content = $"EndPosition={(int) EndPosition.X}, {(int) EndPosition.Y}";
+                // check pdf page bound
+                if (EndPosition.X < 0)
+                    EndPosition.X = 0;
+                if (EndPosition.Y < 0)
+                    EndPosition.Y = 0;
+                if (EndPosition.X > imageMemDC.ActualWidth)
+                    EndPosition.X = imageMemDC.ActualWidth;
+                if (EndPosition.Y > imageMemDC.ActualHeight)
+                    EndPosition.Y = imageMemDC.ActualHeight;
                 img.Margin = new Thickness(EndPosition.X - StartPosition.X, EndPosition.Y - StartPosition.Y, 0, 0);
                 MoveImageResizeHandle(img);
                 DragInProgress = true;
+                this.Cursor = Cursors.SizeAll;
             }
         }
 
