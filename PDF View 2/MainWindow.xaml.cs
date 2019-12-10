@@ -28,22 +28,36 @@ namespace PDF_View_2
         private string filepath;
         private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
         private readonly Process currentProcess = Process.GetCurrentProcess();
-        private int renderWidth = 0;
-        private int renderHeight = 0;
+        private int renderWidth = 0;   // PDF底圖原始(最大)寬度
+        private int renderHeight = 0;  // PDF底圖原始(最大)寬度
         private const double maxZoom = 3;
         private double minZoom = 3;
         private int currentPage;
-        //private Vector lastOffsetBackground = new Vector();
-        //private Vector lastOffset = new Vector();
-        //private Vector origionalBackground = new Vector();
         // 拖曳和選圖用的變數
-        private bool _started;
-        private Point _downPoint;
+        private bool _started;  // 拖曳建立選取區用的
+        private Point _downPoint;  // 選取區的初始座標
         private bool DragInProgress = false;
-        private Image movingObject;  // 記錄拖曳圖片資料
         private Point StartPosition; // 移動開始時的座標
         private Point EndPosition;   // 移動結束時的座標
         private double imgScreenWidth, imgScreenHeight;  // 縮放點用的
+        private Image _movingObject;  // 不該存取這個！用下面的 MovingObject 管理
+        /// <summary>
+        /// 記錄拖曳圖片資料
+        /// </summary>
+        private Image MovingObject
+        {
+            get => _movingObject;
+            set
+            {
+                // move last selected item back
+                if (_movingObject != null)
+                    Panel.SetZIndex(_movingObject, 0);
+                // move new item to topmost
+                _movingObject = value;
+                if (_movingObject != null)
+                    Panel.SetZIndex(_movingObject, 1);
+            }
+        }
         // 暫存圖片用的變數
         private List<ImageContainer> imageList;
 
@@ -55,7 +69,6 @@ namespace PDF_View_2
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            //iSize = m_iWidth * m_iHeigh;
             SizeChanged += MainWindow_OnSizeChanged;
             grid2.MouseDown += CanvasGrid_MouseDown;
             grid2.MouseMove += CanvasGrid_MouseMove;
@@ -99,9 +112,16 @@ namespace PDF_View_2
                         //btnClear.IsEnabled = true;
                         btnSave.IsEnabled = true;
                         Zoom.IsEnabled = true;
+                        pageControl.IsEnabled = true;
                     }
                     else
+                    {
                         pdfDoc = null;
+                        pageControl.IsEnabled = false;
+                        btnEmbed.IsEnabled = false;
+                        btnSave.IsEnabled = false;
+                        Zoom.IsEnabled = false;
+                    }
                 }
             }
         }
@@ -138,10 +158,7 @@ namespace PDF_View_2
             double wScale = scrollViewer.ActualWidth / renderWidth;
             double hScale = scrollViewer.ActualHeight / renderHeight;
             minZoom = Math.Min(wScale, hScale);
-            //Console.WriteLine("minZoom=" + minZoom);
             Zoom.Minimum = minZoom;
-            //origionalBackground = lastOffsetBackground = VisualTreeHelper.GetOffset(imageMemDC);
-            movingObject = null;
 
             labelMemDC.Content = string.Format("Page: {0}, Memory: {1} MB, Time: {2:0.0} sec",
                 page,
@@ -151,6 +168,8 @@ namespace PDF_View_2
             currentProcess.Refresh();
             GC.Collect();
 
+            MovingObject = null;
+            currentPage = page;
             LoadImagesToPage();
             ShowImageResizeHandle(false);
             btnClear.IsEnabled = false;
@@ -178,8 +197,13 @@ namespace PDF_View_2
         {
             if (!int.TryParse(txtPage.Text, out int page))
                 return;
-            
-            await GoPage(page-1);
+            if (page <= 0 || page > pdfDoc.PageCount)
+                return;
+            if (currentPage == page - 1)
+                return;
+            currentPage = page - 1;
+            await GoPage(currentPage);
+            DeterminePageButton();
         }
 
         #endregion
@@ -229,9 +253,6 @@ namespace PDF_View_2
                 return;
             _started = true;
             _downPoint = e.GetPosition(grid2);
-            //Point centerPoint = new Point(canvasGrid.ActualWidth, canvasGrid.ActualHeight);
-            //_downPoint.X -= centerPoint.X;
-            //_downPoint.Y -= centerPoint.Y;
         }
         
         private void CanvasGrid_MouseUp(object sender, MouseButtonEventArgs e)
@@ -246,6 +267,7 @@ namespace PDF_View_2
                 return;
             if (_started)
             {
+                MovingObject = null;
                 ShowImageResizeHandle(false);
                 Point point = e.GetPosition(grid2);
                 Rect rect = new Rect(_downPoint, point);
@@ -258,6 +280,9 @@ namespace PDF_View_2
         
         private void BtnEmbed_OnClick(object sender, RoutedEventArgs e)
         {
+            if (pickRectangle.Visibility != Visibility.Visible)
+                return;
+
             // 重新定義Transform属性
             Image img = new Image();
             img.Margin = pickRectangle.Margin;
@@ -274,6 +299,10 @@ namespace PDF_View_2
             img.MouseLeftButtonUp += Img_MouseLeftButtonUp;
             canvasGrid.Children.Add(img);
             imageList[currentPage].Add(img);
+
+            // select created image
+            MovingObject = img;
+            btnDelete.IsEnabled = true;
         }
 
         #endregion
@@ -284,7 +313,7 @@ namespace PDF_View_2
             Image img = sender as Image;
             DragInProgress = false;
             //movingObject = null;
-            Panel.SetZIndex(img, 0);
+            //Panel.SetZIndex(img, 0);
             btnDelete.IsEnabled = true;
             btnClear.IsEnabled = true;
             this.Cursor = Cursors.Arrow;
@@ -295,16 +324,16 @@ namespace PDF_View_2
             Console.WriteLine("Image_MouseLeftButtonDown");
             Image img = sender as Image;
             DragInProgress = false;
-            movingObject = img;
+
+            MovingObject = img;
             StartPosition = e.GetPosition(img);
             CalculateImageResizeHandle(img);
             MoveImageResizeHandle(img);
-            Panel.SetZIndex(img, 1);
         }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
         {
-            if (sender is Image img && e.LeftButton == MouseButtonState.Pressed && img == movingObject)
+            if (sender is Image img && e.LeftButton == MouseButtonState.Pressed && img == MovingObject)
             {
                 EndPosition = e.GetPosition(grid2);
                 //labelDebug.Content = $"EndPosition={(int) EndPosition.X}, {(int) EndPosition.Y}";
@@ -379,10 +408,10 @@ namespace PDF_View_2
 
         private void BtnDelete_OnClick(object sender, RoutedEventArgs e)
         {
-            if (movingObject != null)
+            if (MovingObject != null)
             {
-                imageList[currentPage].Images.Remove(movingObject);
-                canvasGrid.Children.Remove(movingObject);
+                imageList[currentPage].Remove(MovingObject);
+                canvasGrid.Children.Remove(MovingObject);
                 ShowImageResizeHandle(false);
                 btnClear.IsEnabled = false;
             }
@@ -392,7 +421,7 @@ namespace PDF_View_2
         {
             if (DragInProgress)
                 return;
-            if (movingObject == null)
+            if (MovingObject == null)
                 return;
             if (e.PreviousSize == e.NewSize)
                 return;
@@ -400,11 +429,11 @@ namespace PDF_View_2
             // resize image
             double imgActualWidth = e.NewSize.Width / Zoom.Value;
             double imgActualHeight = e.NewSize.Height / Zoom.Value;
-            movingObject.Width = imgActualWidth;
-            movingObject.Height = imgActualHeight;
+            MovingObject.Width = imgActualWidth;
+            MovingObject.Height = imgActualHeight;
             // move image margin
             Point relativePoint = resizeControl.TransformToVisual(grid2).Transform(new Point(0, 0));
-            movingObject.Margin = new Thickness(relativePoint.X, relativePoint.Y, 0, 0);
+            MovingObject.Margin = new Thickness(relativePoint.X, relativePoint.Y, 0, 0);
         }
     }
 }

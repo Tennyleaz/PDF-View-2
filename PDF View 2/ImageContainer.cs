@@ -32,7 +32,7 @@ namespace PDF_View_2
             Images.Add(image);
         }
 
-        public bool Delete(Image image)
+        public bool Remove(Image image)
         {
             return Images.Remove(image);
         }
