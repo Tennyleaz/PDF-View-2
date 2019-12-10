@@ -90,6 +90,8 @@ namespace PDF_View_2
 
                     if (pdfDoc.PageCount > 0)
                     {
+                        for (int i = 0; i < pdfDoc.PageCount; i++)
+                            imageList.Add(new ImageContainer());
                         await GoPage(0);
                         currentPage = 0;
                         DeterminePageButton();
@@ -97,8 +99,6 @@ namespace PDF_View_2
                         //btnClear.IsEnabled = true;
                         btnSave.IsEnabled = true;
                         Zoom.IsEnabled = true;
-                        for (int i=0; i<pdfDoc.PageCount; i++)
-                            imageList.Add(new ImageContainer());
                     }
                     else
                         pdfDoc = null;
@@ -150,6 +150,8 @@ namespace PDF_View_2
 
             currentProcess.Refresh();
             GC.Collect();
+
+            LoadImagesToPage();
             ShowImageResizeHandle(false);
             btnClear.IsEnabled = false;
         }
@@ -263,13 +265,14 @@ namespace PDF_View_2
             img.Stretch = Stretch.Fill;
             img.HorizontalAlignment = HorizontalAlignment.Left;
             img.VerticalAlignment = VerticalAlignment.Top;
-            ImageSource imageSource = new BitmapImage(new Uri(@"C:\Workspace\PDFView\PDF View 2\PDF View 2\microsoft-account.png"));
+            ImageSource imageSource = new BitmapImage(new Uri(@"C:\Users\Tenny\Pictures\microsoft-account.png"));
             imageSource.Freeze();
             img.Source = imageSource;
             img.MouseLeftButtonDown += Image_MouseLeftButtonDown;
             img.MouseMove += Image_MouseMove;
             img.MouseLeftButtonUp += Img_MouseLeftButtonUp;
             canvasGrid.Children.Add(img);
+            imageList[currentPage].Add(img);
         }
 
         #endregion
@@ -351,6 +354,15 @@ namespace PDF_View_2
             upRightHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             buttomLeftHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             buttomRightHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+        private void LoadImagesToPage()
+        {
+            canvasGrid.Children.Clear();
+            foreach (Image image in imageList[currentPage].Images)
+            {
+                canvasGrid.Children.Add(image);
+            }
+        }
+
         private void BtnDelete_OnClick(object sender, RoutedEventArgs e)
         {
             if (movingObject != null)
