@@ -85,6 +85,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MoveAndResize.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

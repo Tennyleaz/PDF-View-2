@@ -37,10 +37,7 @@
                     <Rectangle Name="pickRectangle" StrokeThickness="2" Stroke="Black" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 </Grid>
                 <!--縮放工具，必須跟著 scrollViewer 滾動-->
-                <Rectangle Name="upLeftHandle" Width="6" Height="6" Stroke="Black" Fill="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <Rectangle Name="upRightHandle" Width="6" Height="6" Stroke="Black" Fill="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <Rectangle Name="buttomLeftHandle" Width="6" Height="6" Stroke="Black" Fill="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <Rectangle Name="buttomRightHandle" Width="6" Height="6" Stroke="Black" Fill="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <ContentControl Name="resizeControl" Width="0" Height="0" HorizontalAlignment="Left" VerticalAlignment="Top" SizeChanged="ResizeControl_OnSizeChanged"/>
                 <Label Name="labelDebug" Content="debug" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
                 <Label Name="labelMemDC" HorizontalAlignment="Right" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
             </Grid>

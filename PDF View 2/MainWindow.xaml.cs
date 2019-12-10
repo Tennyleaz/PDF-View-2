@@ -338,12 +338,9 @@ namespace PDF_View_2
                 return;
             }
 
-            pickRectangle.Margin = img.Margin;
+            //pickRectangle.Margin = img.Margin;
             Point relativePoint = img.TransformToAncestor(grid1).Transform(new Point(0, 0));
-            upLeftHandle.Margin = new Thickness(relativePoint.X - 2, relativePoint.Y - 2, 0, 0);
-            upRightHandle.Margin = new Thickness(relativePoint.X - 3 + imgScreenWidth, relativePoint.Y - 2, 0, 0);
-            buttomLeftHandle.Margin = new Thickness(relativePoint.X - 2, relativePoint.Y - 3 + imgScreenHeight, 0, 0);
-            buttomRightHandle.Margin = new Thickness(relativePoint.X - 3 + imgScreenWidth, relativePoint.Y - 3 + imgScreenHeight, 0, 0);
+            resizeControl.Margin = new Thickness(relativePoint.X, relativePoint.Y, 0, 0);
         }
 
         private void CalculateImageResizeHandle(Image img)
@@ -352,21 +349,25 @@ namespace PDF_View_2
                 return;
             double imgWidth = img.Width;
             double imgHeight = img.Height;
-            pickRectangle.Width = imgWidth;
-            pickRectangle.Height = imgHeight;
-            pickRectangle.Margin = img.Margin;
+            //pickRectangle.Width = imgWidth;
+            //pickRectangle.Height = imgHeight;
+            //pickRectangle.Margin = img.Margin;
             imgScreenWidth = imgWidth * Zoom.Value;
             imgScreenHeight = imgHeight * Zoom.Value;
             ShowImageResizeHandle(true);
+            resizeControl.Width = imgScreenWidth;
+            resizeControl.Height = imgScreenHeight;
         }
 
         private void ShowImageResizeHandle(bool isVisible)
         {
-            pickRectangle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-            upLeftHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-            upRightHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-            buttomLeftHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
-            buttomRightHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            resizeControl.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            pickRectangle.Visibility = Visibility.Collapsed;
+            //pickRectangle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            if (!isVisible)
+                btnDelete.IsEnabled = false;
+        }
+
         private void LoadImagesToPage()
         {
             canvasGrid.Children.Clear();
@@ -386,6 +387,24 @@ namespace PDF_View_2
                 btnClear.IsEnabled = false;
             }
         }
+
+        private void ResizeControl_OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (DragInProgress)
+                return;
+            if (movingObject == null)
+                return;
+            if (e.PreviousSize == e.NewSize)
+                return;
+            
+            // resize image
+            double imgActualWidth = e.NewSize.Width / Zoom.Value;
+            double imgActualHeight = e.NewSize.Height / Zoom.Value;
+            movingObject.Width = imgActualWidth;
+            movingObject.Height = imgActualHeight;
+            // move image margin
+            Point relativePoint = resizeControl.TransformToVisual(grid2).Transform(new Point(0, 0));
+            movingObject.Margin = new Thickness(relativePoint.X, relativePoint.Y, 0, 0);
         }
     }
 }
