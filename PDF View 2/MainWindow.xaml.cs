@@ -94,7 +94,7 @@ namespace PDF_View_2
                         currentPage = 0;
                         DeterminePageButton();
                         btnEmbed.IsEnabled = true;
-                        btnClear.IsEnabled = true;
+                        //btnClear.IsEnabled = true;
                         btnSave.IsEnabled = true;
                         Zoom.IsEnabled = true;
                         for (int i=0; i<pdfDoc.PageCount; i++)
@@ -141,6 +141,7 @@ namespace PDF_View_2
             //Console.WriteLine("minZoom=" + minZoom);
             Zoom.Minimum = minZoom;
             //origionalBackground = lastOffsetBackground = VisualTreeHelper.GetOffset(imageMemDC);
+            movingObject = null;
 
             labelMemDC.Content = string.Format("Page: {0}, Memory: {1} MB, Time: {2:0.0} sec",
                 page,
@@ -149,6 +150,8 @@ namespace PDF_View_2
 
             currentProcess.Refresh();
             GC.Collect();
+            ShowImageResizeHandle(false);
+            btnClear.IsEnabled = false;
         }
 
         private async void BtnPrev_OnClick(object sender, RoutedEventArgs e)
@@ -232,6 +235,7 @@ namespace PDF_View_2
         private void CanvasGrid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             _started = false;
+            btnClear.IsEnabled = true;
         }
 
         private void CanvasGrid_MouseMove(object sender, MouseEventArgs e)
@@ -277,6 +281,8 @@ namespace PDF_View_2
             DragInProgress = false;
             //movingObject = null;
             Panel.SetZIndex(img, 0);
+            btnDelete.IsEnabled = true;
+            btnClear.IsEnabled = true;
         }
 
         private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -304,9 +310,8 @@ namespace PDF_View_2
 
         private void BtnClear_OnClick(object sender, RoutedEventArgs e)
         {
-            pickRectangle.Width = 0;
-            pickRectangle.Height = 0;
-            pickRectangle.Visibility = Visibility.Collapsed;
+            ShowImageResizeHandle(false);
+            btnClear.IsEnabled = false;
         }
 
         private void MoveImageResizeHandle(Image img)
@@ -346,6 +351,16 @@ namespace PDF_View_2
             upRightHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             buttomLeftHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             buttomRightHandle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+        private void BtnDelete_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (movingObject != null)
+            {
+                imageList[currentPage].Images.Remove(movingObject);
+                canvasGrid.Children.Remove(movingObject);
+                ShowImageResizeHandle(false);
+                btnClear.IsEnabled = false;
+            }
+        }
         }
     }
 }

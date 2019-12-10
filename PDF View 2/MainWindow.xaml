@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:PDF_View_2"
         mc:Ignorable="d"
         Background="White" Loaded="MainWindow_OnLoaded"
-        Title="MainWindow" Height="600" Width="800">
+        Title="MainWindow" Height="600" Width="800" MinHeight="600" MinWidth="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -19,8 +19,8 @@
             <Button Name="btnSave" Content="Save PDF" Click="BtnSave_Click" Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
             <Slider Name="Zoom" Minimum="0.1" Maximum="1" VerticalAlignment="Center" Width="200" Orientation="Horizontal" IsEnabled="False" ValueChanged="Zoom_OnValueChanged"/>
             <Button Name="btnEmbed" Content="Embed" Click="BtnEmbed_OnClick" Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
-            <Button Name="btnClear" Content="Clear" Click="BtnClear_OnClick" Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
-            <Label Name="labelMemDC"/>
+            <Button Name="btnDelete" Content="Delete" Click="BtnDelete_OnClick"  Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
+            <Button Name="btnClear" Content="Clear Selection" Click="BtnClear_OnClick" Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
         </StackPanel>
 
         <ScrollViewer Name="scrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
@@ -33,6 +33,7 @@
                     <Image Name="imageMemDC" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                     <!--Canvas 只用來放嵌入的圖片-->
                     <Canvas Name="canvasGrid"/>
+                    <!--選取工具，必須跟著 grid2 直接縮放-->
                     <Rectangle Name="pickRectangle" StrokeThickness="2" Stroke="Black" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 </Grid>
                 <!--縮放工具，必須跟著 scrollViewer 滾動-->
@@ -40,7 +41,8 @@
                 <Rectangle Name="upRightHandle" Width="6" Height="6" Stroke="Black" Fill="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <Rectangle Name="buttomLeftHandle" Width="6" Height="6" Stroke="Black" Fill="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <Rectangle Name="buttomRightHandle" Width="6" Height="6" Stroke="Black" Fill="White" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <Label Name="labelDebug" Content="debug" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+                <Label Name="labelDebug" Content="debug" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
+                <Label Name="labelMemDC" HorizontalAlignment="Right" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
             </Grid>
         </ScrollViewer>
 
