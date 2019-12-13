@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Globalization;
 using PdfiumViewer;
+using PdfTracker;
 
 namespace PDF_View_2
 {
@@ -65,6 +66,8 @@ namespace PDF_View_2
         {
             InitializeComponent();
             imageList = new List<ImageContainer>();
+            matomoAnalytics = new MatomoAnalytics();
+            matomoAnalytics.Init();
         }
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -74,6 +77,7 @@ namespace PDF_View_2
             grid2.MouseMove += CanvasGrid_MouseMove;
             grid2.MouseUp += CanvasGrid_MouseUp;
             ShowImageResizeHandle(false);
+            matomoAnalytics.TrackOP(PDF_OP.Launch);
         }
 
         #region load and save PDF files
@@ -162,7 +166,7 @@ namespace PDF_View_2
 
             labelMemDC.Content = string.Format("Page: {0}, Memory: {1} MB, Time: {2:0.0} sec",
                 page,
-                ConvertBytesToMegabytes(currentProcess.WorkingSet64),
+                Utility.ConvertBytesToMegabytes(currentProcess.WorkingSet64),
                 sw.Elapsed.TotalSeconds);
 
             currentProcess.Refresh();
@@ -207,11 +211,6 @@ namespace PDF_View_2
         }
 
         #endregion
-
-        private static double ConvertBytesToMegabytes(long bytes)
-        {
-            return (bytes / 1024f) / 1024f;
-        }
 
         private void Zoom_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
