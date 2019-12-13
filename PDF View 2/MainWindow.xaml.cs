@@ -61,6 +61,7 @@ namespace PDF_View_2
         }
         // 暫存圖片用的變數
         private List<ImageContainer> imageList;
+        private readonly MatomoAnalytics matomoAnalytics;
 
         public MainWindow()
         {
@@ -84,12 +85,19 @@ namespace PDF_View_2
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            string path = System.IO.Path.GetDirectoryName(filepath);
+            path += @"\test.json";
             var dialog = new System.Windows.Forms.SaveFileDialog();
-            dialog.Title = "Save PDF";
-            dialog.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*";
-            dialog.FileName = filepath;
+            dialog.Title = "Save JSON";
+            dialog.Filter = "JSON Files (*.json)|*.json";
+            dialog.FileName = path;
             if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 return;
+
+            if (ImageIE.Export(imageList, dialog.FileName, maxZoom))
+                MessageBox.Show("OK");
+            else
+                MessageBox.Show("Failed!");
         }
 
         private async void LoadPDFButton_Click(object sender, RoutedEventArgs e)
