@@ -20,6 +20,7 @@
             <Slider Name="Zoom" Minimum="0.1" Maximum="1" VerticalAlignment="Center" Width="200" Orientation="Horizontal" IsEnabled="False" ValueChanged="Zoom_OnValueChanged"/>
             <Button Name="btnEmbed" Content="Embed" Click="BtnEmbed_OnClick" Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
             <Button Name="btnDelete" Content="Delete" Click="BtnDelete_OnClick"  Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
+            <Button Name="btnRecoverDelete" Content="Recover Delete" Click="BtnRecoverDelete_OnClick"  Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
             <Button Name="btnClear" Content="Clear Selection" Click="BtnClear_OnClick" Padding="5,0,5,0" Margin="10,0,10,0" IsEnabled="False"/>
         </StackPanel>
 
@@ -43,12 +44,13 @@
             </Grid>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Name="btnPrev" Width="60" Margin="10,0,10,0" Click="BtnPrev_OnClick">Prev</Button>
-            <TextBox Name="txtPage" TextWrapping="Wrap" Width="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-            <Label VerticalAlignment="Center">/</Label>
-            <Label Name="labelTotalPages" Width="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">0</Label>
-            <Button Width="60" Content="GO" Name="btnGO" Click="BtnGoPage_Click" Margin="10,0,10,0"/>
+        <StackPanel Name="pageControl" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,3,0,3" IsEnabled="False">
+            <Button Name="btnPrev" Width="60" Margin="10,0,0,0" Click="BtnPrev_OnClick">Prev</Button>
+            <Grid Width="100">
+                <TextBox Name="txtPage" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="10,0,50,0" MaxLength="5" KeyDown="TxtPage_OnKeyDown"/>
+                <Label VerticalAlignment="Center" Margin="50,0,0,0">/</Label>
+                <Label Name="labelTotalPages" Margin="60,0,0,0" HorizontalContentAlignment="Left" VerticalContentAlignment="Center">0</Label>
+            </Grid>
             <Button Name="btnNext" Width="60" Margin="10,0,10,0" Click="BtnNext_OnClick">Next</Button>
         </StackPanel>
     </Grid>

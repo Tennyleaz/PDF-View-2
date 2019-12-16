@@ -61,6 +61,7 @@ namespace PDF_View_2
         }
         // 暫存圖片用的變數
         private List<ImageContainer> imageList;
+        private Image deletedItem;
         private readonly MatomoAnalytics matomoAnalytics;
 
         public MainWindow()
@@ -180,6 +181,8 @@ namespace PDF_View_2
             currentProcess.Refresh();
             GC.Collect();
 
+            deletedItem = null;
+            btnRecoverDelete.IsEnabled = false;
             MovingObject = null;
             currentPage = page;
             LoadImagesToPage();
@@ -205,17 +208,20 @@ namespace PDF_View_2
             DeterminePageButton();
         }
 
-        private async void BtnGoPage_Click(object sender, RoutedEventArgs e)
+        private async void TxtPage_OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (!int.TryParse(txtPage.Text, out int page))
-                return;
-            if (page <= 0 || page > pdfDoc.PageCount)
-                return;
-            if (currentPage == page - 1)
-                return;
-            currentPage = page - 1;
-            await GoPage(currentPage);
-            DeterminePageButton();
+            if (e.Key == Key.Enter)
+            {
+                if (!int.TryParse(txtPage.Text, out int page))
+                    return;
+                if (page <= 0 || page > pdfDoc.PageCount)
+                    return;
+                if (currentPage == page - 1)
+                    return;
+                currentPage = page - 1;
+                await GoPage(currentPage);
+                DeterminePageButton();
+            }
         }
 
         #endregion
@@ -417,10 +423,26 @@ namespace PDF_View_2
         {
             if (MovingObject != null)
             {
+                deletedItem = MovingObject;
                 imageList[currentPage].Remove(MovingObject);
                 canvasGrid.Children.Remove(MovingObject);
                 ShowImageResizeHandle(false);
                 btnClear.IsEnabled = false;
+                btnRecoverDelete.IsEnabled = true;
+            }
+        }
+
+        private void BtnRecoverDelete_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (deletedItem != null)
+            {
+                canvasGrid.Children.Add(deletedItem);
+                imageList[currentPage].Add(deletedItem);
+
+                // select created image
+                MovingObject = deletedItem;
+                btnDelete.IsEnabled = true;
+                btnRecoverDelete.IsEnabled = false;
             }
         }
 
