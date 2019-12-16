@@ -132,6 +132,7 @@
     </ApplicationDefinition>
     <Compile Include="ImageIE.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="MyPdfWriter.cs" />
     <Compile Include="Utility.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

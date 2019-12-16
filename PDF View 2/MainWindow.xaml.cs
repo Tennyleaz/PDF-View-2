@@ -87,6 +87,28 @@ namespace PDF_View_2
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             string path = System.IO.Path.GetDirectoryName(filepath);
+            string fineName = System.IO.Path.GetFileNameWithoutExtension(filepath);
+            path += @"\" + fineName + " - new.pdf";
+            var dialog = new System.Windows.Forms.SaveFileDialog();
+            dialog.Title = "Save PDF";
+            dialog.Filter = "PDF Files (*.pdf)|*.pdf";
+            dialog.FileName = path;
+            dialog.OverwritePrompt = true;
+
+            if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                return;
+
+            if (dialog.FileName == filepath)
+            {
+                MessageBox.Show("You need to save to a new file.");
+                return;
+            }
+
+            if (MyPdfWriter.WritePdf(filepath, dialog.FileName, imageList, maxZoom))
+                MessageBox.Show("OK");
+            else
+                MessageBox.Show("Failed!");
+            /*string path = System.IO.Path.GetDirectoryName(filepath);
             path += @"\test.json";
             var dialog = new System.Windows.Forms.SaveFileDialog();
             dialog.Title = "Save JSON";
@@ -98,7 +120,7 @@ namespace PDF_View_2
             if (ImageIE.Export(imageList, dialog.FileName, maxZoom))
                 MessageBox.Show("OK");
             else
-                MessageBox.Show("Failed!");
+                MessageBox.Show("Failed!");*/
         }
 
         private async void LoadPDFButton_Click(object sender, RoutedEventArgs e)
