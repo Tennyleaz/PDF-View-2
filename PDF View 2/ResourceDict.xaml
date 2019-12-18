@@ -113,11 +113,11 @@
                                                                 <Setter Property="Fill" Value="Silver" />
                                                             </Style>
                                                         </Grid.Resources>
-                                                        <Rectangle SnapsToDevicePixels="True" StrokeThickness="1" Margin="1" Stroke="Black"  StrokeDashArray="4 4"/>
-                                                        <Ellipse HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                                        <Ellipse HorizontalAlignment="Right" VerticalAlignment="Top"/>
-                                                        <Ellipse HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                                                        <Ellipse HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                                                        <Rectangle SnapsToDevicePixels="True" StrokeThickness="1" Margin="1" Stroke="DodgerBlue" StrokeDashArray="4 4"/>
+                                                        <Rectangle HorizontalAlignment="Left" VerticalAlignment="Top" Fill="White" Stroke="Black" StrokeThickness="1" Width="6" Height="6"/>
+                                                        <Rectangle HorizontalAlignment="Left" VerticalAlignment="Bottom" Fill="White" Stroke="Black" StrokeThickness="1" Width="6" Height="6"/>
+                                                        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Top" Fill="White" Stroke="Black" StrokeThickness="1" Width="6" Height="6"/>
+                                                        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Bottom" Fill="White" Stroke="Black" StrokeThickness="1" Width="6" Height="6"/>
                                                     </Grid>
                                                 </Grid>
                                             </ControlTemplate>
