@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using iText.IO.Image;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
-using iText.Layout;
-using iText.Layout.Element;
 
 namespace PDF_View_2
 {
@@ -26,7 +23,6 @@ namespace PDF_View_2
             for (int i = 0; i < pdf.GetNumberOfPages(); i++)
             {
                 PdfPage page = pdf.GetPage(i + 1);
-                var objects = page.GetPdfObject();
                 var canvas = new PdfCanvas(page);
 
                 float pageHeight = page.GetPageSize().GetHeight();

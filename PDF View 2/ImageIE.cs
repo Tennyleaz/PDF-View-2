@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Text.Json;
 using System.Windows.Input;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace PDF_View_2
 {
@@ -22,14 +21,14 @@ namespace PDF_View_2
                 document.Add(page);
             }
 
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
+            //var options = new JsonSerializerOptions
+            //{
+            //    WriteIndented = true
+            //};
 
             try
             {
-                string jsonString = JsonSerializer.Serialize(document, options);
+                string jsonString = JsonConvert.SerializeObject(document);
                 if (Path.GetExtension(exportPath) != ".json")
                     exportPath += @"\.json";
                 if (File.Exists(exportPath))
@@ -52,7 +51,7 @@ namespace PDF_View_2
             try
             {
                 string jsonString = File.ReadAllText(jsonPath);
-                document = JsonSerializer.Deserialize<List<ExportedPage>>(jsonString);
+                document = JsonConvert.DeserializeObject<List<ExportedPage>>(jsonString);
             }
             catch(Exception ex)
             {

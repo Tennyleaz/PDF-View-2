@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -145,7 +144,6 @@ namespace PDF_View_2
                         currentPage = 0;
                         DeterminePageButton();
                         btnEmbed.IsEnabled = true;
-                        //btnClear.IsEnabled = true;
                         btnSave.IsEnabled = true;
                         Zoom.IsEnabled = true;
                         pageControl.IsEnabled = true;
@@ -183,7 +181,7 @@ namespace PDF_View_2
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            imageMemDC.Source = await Task.Run(() =>
+            imageMemDC.Source = await Task.Factory.StartNew(() =>
                 {
                     tokenSource.Token.ThrowIfCancellationRequested();
                     return RenderPageToMemDC(page);
@@ -266,11 +264,7 @@ namespace PDF_View_2
             minZoom = Math.Min(wScale, hScale);
             //Console.WriteLine("minZoom=" + minZoom);
             Zoom.Minimum = minZoom;
-            /*if (upLeftHandle.Visibility == Visibility.Visible)
-            {
-                CalculateImageResizeHandle(movingObject);
-                MoveImageResizeHandle(movingObject);
-            }*/
+
             ShowImageResizeHandle(false);
         }
 
@@ -414,8 +408,7 @@ namespace PDF_View_2
                 ShowImageResizeHandle(false);
                 return;
             }
-
-            //pickRectangle.Margin = img.Margin;
+            
             Point relativePoint = img.TransformToAncestor(grid1).Transform(new Point(0, 0));
             resizeControl.Margin = new Thickness(relativePoint.X, relativePoint.Y, 0, 0);
         }
@@ -426,9 +419,7 @@ namespace PDF_View_2
                 return;
             double imgWidth = img.Width;
             double imgHeight = img.Height;
-            //pickRectangle.Width = imgWidth;
-            //pickRectangle.Height = imgHeight;
-            //pickRectangle.Margin = img.Margin;
+            
             imgScreenWidth = imgWidth * Zoom.Value;
             imgScreenHeight = imgHeight * Zoom.Value;
             ShowImageResizeHandle(true);
@@ -440,7 +431,7 @@ namespace PDF_View_2
         {
             resizeControl.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
             pickRectangle.Visibility = Visibility.Collapsed;
-            //pickRectangle.Visibility = isVisible ? Visibility.Visible : Visibility.Collapsed;
+            
             if (!isVisible)
                 btnDelete.IsEnabled = false;
         }
