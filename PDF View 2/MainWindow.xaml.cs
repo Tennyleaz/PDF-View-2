@@ -31,7 +31,7 @@ namespace PDF_View_2
         private readonly Process currentProcess = Process.GetCurrentProcess();
         private int renderWidth = 0;   // PDF底圖原始(最大)寬度
         private int renderHeight = 0;  // PDF底圖原始(最大)寬度
-        private const double maxZoom = 3;
+        private const double MAX_ZOOM = 3;
         private double minZoom = 3;
         private int currentPage;
         // 拖曳和選圖用的變數
@@ -61,6 +61,7 @@ namespace PDF_View_2
         }
         // 暫存圖片用的變數
         private List<ImageContainer> imageList;
+        private const int MAX_IMAGES_PER_PAGE = 10;
         private Image deletedItem;
         private readonly MatomoAnalytics matomoAnalytics;
 
@@ -87,8 +88,8 @@ namespace PDF_View_2
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             string path = System.IO.Path.GetDirectoryName(filepath);
-            string fineName = System.IO.Path.GetFileNameWithoutExtension(filepath);
-            path += @"\" + fineName + " - new.pdf";
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(filepath);
+            path += @"\" + fileName + " - new.pdf";
             var dialog = new System.Windows.Forms.SaveFileDialog();
             dialog.Title = "Save PDF";
             dialog.Filter = "PDF Files (*.pdf)|*.pdf";
@@ -104,7 +105,7 @@ namespace PDF_View_2
                 return;
             }
 
-            if (MyPdfWriter.WritePdf(filepath, dialog.FileName, imageList, maxZoom))
+            if (MyPdfWriter.WritePdf(filepath, dialog.FileName, imageList, MAX_ZOOM))
                 MessageBox.Show("OK");
             else
                 MessageBox.Show("Failed!");
@@ -117,7 +118,7 @@ namespace PDF_View_2
             if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 return;
 
-            if (ImageIE.Export(imageList, dialog.FileName, maxZoom))
+            if (ImageIE.Export(imageList, dialog.FileName, MAX_ZOOM))
                 MessageBox.Show("OK");
             else
                 MessageBox.Show("Failed!");*/
@@ -168,8 +169,8 @@ namespace PDF_View_2
         private BitmapSource RenderPageToMemDC(int page)
         {
             // cast the result of the expression, not the width/height values
-            renderWidth = (int)(pdfDoc.PageSizes[page].Width * maxZoom);  // produce the max allowed image, and resize to smaller on display
-            renderHeight = (int)(pdfDoc.PageSizes[page].Height * maxZoom);
+            renderWidth = (int)(pdfDoc.PageSizes[page].Width * MAX_ZOOM);  // produce the max allowed image, and resize to smaller on display
+            renderHeight = (int)(pdfDoc.PageSizes[page].Height * MAX_ZOOM);
 
             var image = pdfDoc.Render(page, renderWidth, renderHeight, 300, 300, false);
             return BitmapHelper.ToBitmapSource(image);
@@ -317,6 +318,11 @@ namespace PDF_View_2
         {
             if (pickRectangle.Visibility != Visibility.Visible)
                 return;
+            if (imageList[currentPage].Images.Count >= MAX_IMAGES_PER_PAGE)
+            {
+                MessageBox.Show($"Max image per page is {MAX_IMAGES_PER_PAGE}!");
+                return;
+            }
 
             // 重新定義Transform属性
             Image img = new Image();
@@ -392,6 +398,13 @@ namespace PDF_View_2
         {
             ShowImageResizeHandle(false);
             btnClear.IsEnabled = false;
+        }
+
+        private void BtnClearPage_OnClick(object sender, RoutedEventArgs e)
+        {
+            MovingObject = null;
+            canvasGrid.Children.Clear();
+            imageList[currentPage].Clear();
         }
 
         private void MoveImageResizeHandle(Image img)
