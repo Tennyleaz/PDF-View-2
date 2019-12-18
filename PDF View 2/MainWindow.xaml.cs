@@ -132,7 +132,32 @@ namespace PDF_View_2
 
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    pdfDoc = PdfDocument.Load(dialog.FileName);
+                    try
+                    {
+                        pdfDoc = PdfDocument.Load(dialog.FileName);
+                    }
+                    catch (PdfException ex)
+                    {
+                        if (ex.Error == PdfError.PasswordProtected)
+                        {
+                            if (!TryLoadPdfWithPassword(dialog.FileName))
+                            {
+                                MessageBox.Show("Open PDF failed!");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show(ex.ToString());
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                        return;
+                    }
+
                     filepath = dialog.FileName;
                     labelTotalPages.Content = pdfDoc.PageCount;
 
@@ -160,6 +185,26 @@ namespace PDF_View_2
             }
         }
 
+        private bool TryLoadPdfWithPassword(string fileName)
+        {
+            PasswordWindow passWin = new PasswordWindow();
+            passWin.Owner = this;
+            if (passWin.ShowDialog() != true)
+                return false;
+            try
+            {
+                pdfDoc = PdfDocument.Load(fileName, passWin.Password);
+                return true;
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show(e.ToString());
+                Console.WriteLine(e);
+            }
+
+            return false;
+        }
+
         #endregion
 
         #region render and switch PDF pages
@@ -181,7 +226,7 @@ namespace PDF_View_2
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            imageMemDC.Source = await Task.Factory.StartNew(() =>
+            imageMemDC.Source = await Task.Factory.StartNew(() =>  // Task.Run() in .net 4.5+
                 {
                     tokenSource.Token.ThrowIfCancellationRequested();
                     return RenderPageToMemDC(page);
